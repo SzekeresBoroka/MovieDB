@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">MovieDB</string>
+
+    <!-- SharedPreferences data -->
+    <string name="active_user">Active User</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="login_text">Login</string>
+    <string name="username_text">Username</string>
+    <string name="password_text">Password</string>
+    <string name="register_text">Register</string>
+    <string name="confirm_password_text">Confirm Password</string>
+    <string name="change_password_text">Change Password</string>
+    <string name="cancel_text">Cancel</string>
+</resources>
