@@ -1,4 +1,4 @@
-package com.example.moviedb;
+package com.example.moviedb.fragments;
 
 
 import android.content.Context;
@@ -15,6 +15,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.example.moviedb.MainActivity;
+import com.example.moviedb.R;
 
 public class RegisterFragment extends Fragment {
 

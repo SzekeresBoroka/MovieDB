@@ -11,8 +11,8 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/action_top_100"
-        android:title="Top 100"
+        android:id="@+id/action_top_movies"
+        android:title="Top Movies"
         android:icon="@drawable/top_100_movies_icon"
         android:enabled="true"
         android:visible="true"

@@ -7,6 +7,8 @@ import androidx.fragment.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
+import com.example.moviedb.fragments.LoginFragment;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override

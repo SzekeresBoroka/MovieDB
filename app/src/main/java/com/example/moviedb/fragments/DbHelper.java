@@ -1,4 +1,4 @@
-package com.example.moviedb;
+package com.example.moviedb.fragments;
 
 import android.content.ContentValues;
 import android.content.Context;

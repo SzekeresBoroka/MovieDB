@@ -1,4 +1,4 @@
-package com.example.moviedb;
+package com.example.moviedb.fragments;
 
 
 import android.content.Context;
@@ -14,6 +14,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+
+import com.example.moviedb.MainActivity;
+import com.example.moviedb.R;
 
 public class LoginFragment extends Fragment {
 

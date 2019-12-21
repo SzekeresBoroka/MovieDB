@@ -1,13 +1,9 @@
-package com.example.moviedb;
+package com.example.moviedb.fragments;
 
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +11,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+
+import com.example.moviedb.MainActivity;
+import com.example.moviedb.R;
 
 public class ChangePasswordFragment extends Fragment {
 
@@ -64,8 +66,13 @@ public class ChangePasswordFragment extends Fragment {
                     return;
                 }
 
+                ContainerWithMenuFragment containerWithMenuFragment = new ContainerWithMenuFragment();
+                Bundle args = new Bundle();
+                args.putString("fragmentToOpen", "profile");
+                containerWithMenuFragment.setArguments(args);
+
                 FragmentTransaction frag_trans = ((MainActivity) context).getSupportFragmentManager().beginTransaction();
-                frag_trans.replace(R.id.fragment_container_with_menu,new ProfileFragment());
+                frag_trans.replace(R.id.fragment_container_without_menu, containerWithMenuFragment);
                 frag_trans.commit();
             }
         });
@@ -73,8 +80,13 @@ public class ChangePasswordFragment extends Fragment {
         btn_cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ContainerWithMenuFragment containerWithMenuFragment = new ContainerWithMenuFragment();
+                Bundle args = new Bundle();
+                args.putString("fragmentToOpen", "profile");
+                containerWithMenuFragment.setArguments(args);
+
                 FragmentTransaction frag_trans = ((MainActivity) context).getSupportFragmentManager().beginTransaction();
-                frag_trans.replace(R.id.fragment_container_with_menu,new ProfileFragment());
+                frag_trans.replace(R.id.fragment_container_without_menu, containerWithMenuFragment);
                 frag_trans.commit();
             }
         });

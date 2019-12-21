@@ -1,21 +1,22 @@
-package com.example.moviedb;
+package com.example.moviedb.fragments;
 
 
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
+import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+
+import com.example.moviedb.MainActivity;
+import com.example.moviedb.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class ContainerWithMenuFragment extends Fragment {
@@ -34,50 +35,31 @@ public class ContainerWithMenuFragment extends Fragment {
 
         final BottomNavigationView bottomNavBar = view.findViewById(R.id.bottomNavBar);
         bottomNavBar.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-
-            /**
-             * Getting selected menu item, every item has it's own fragment
-             * which will be replaced
-             * @param item
-             * @return
-             */
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_now_playing: {
                         bottomNavBar.getMenu().getItem(0).setChecked(true);
-                        bottomNavBar.getMenu().getItem(1).setChecked(false);
-                        bottomNavBar.getMenu().getItem(2).setChecked(false);
-                        bottomNavBar.getMenu().getItem(3).setChecked(false);
                        /* FragmentTransaction frag_trans = ((MainActivity) context).getSupportFragmentManager().beginTransaction();
                         frag_trans.replace(R.id.fragment_container_with_menu,new NowPlayingFragment());
                         frag_trans.commit();*/
                         break;
                     }
-                    case R.id.action_top_100: {
-                        bottomNavBar.getMenu().getItem(0).setChecked(false);
+                    case R.id.action_top_movies: {
                         bottomNavBar.getMenu().getItem(1).setChecked(true);
-                        bottomNavBar.getMenu().getItem(2).setChecked(false);
-                        bottomNavBar.getMenu().getItem(3).setChecked(false);
-                       /* FragmentTransaction frag_trans = ((MainActivity) context).getSupportFragmentManager().beginTransaction();
+                        FragmentTransaction frag_trans = ((MainActivity) context).getSupportFragmentManager().beginTransaction();
                         frag_trans.replace(R.id.fragment_container_with_menu,new TopMoviesFragment());
-                        frag_trans.commit();*/
+                        frag_trans.commit();
                         break;
                     }
                     case R.id.action_favourites: {
-                        bottomNavBar.getMenu().getItem(0).setChecked(false);
-                        bottomNavBar.getMenu().getItem(1).setChecked(false);
                         bottomNavBar.getMenu().getItem(2).setChecked(true);
-                        bottomNavBar.getMenu().getItem(3).setChecked(false);
                        /* FragmentTransaction frag_trans = ((MainActivity) context).getSupportFragmentManager().beginTransaction();
                         frag_trans.replace(R.id.fragment_container_with_menu,new FavouritesFragment());
                         frag_trans.commit();*/
                         break;
                     }
                     case R.id.action_profile: {
-                        bottomNavBar.getMenu().getItem(0).setChecked(false);
-                        bottomNavBar.getMenu().getItem(1).setChecked(false);
-                        bottomNavBar.getMenu().getItem(2).setChecked(false);
                         bottomNavBar.getMenu().getItem(3).setChecked(true);
                         FragmentTransaction frag_trans = ((MainActivity) context).getSupportFragmentManager().beginTransaction();
                         frag_trans.replace(R.id.fragment_container_with_menu,new ProfileFragment());
@@ -89,8 +71,30 @@ public class ContainerWithMenuFragment extends Fragment {
             }
         });
 
-        bottomNavBar.setSelectedItemId(R.id.action_top_100);
-        bottomNavBar.getMenu().getItem(1).setChecked(true);
+        if(getArguments() != null) {
+            String fragmentToOpen = getArguments().getString("fragmentToOpen");
+            switch (fragmentToOpen){
+                case "profile": {
+                    bottomNavBar.setSelectedItemId(R.id.action_profile);
+                    break;
+                }
+                case "favourites": {
+                    bottomNavBar.setSelectedItemId(R.id.action_favourites);
+                    break;
+                }
+                case "top_movies": {
+                    bottomNavBar.setSelectedItemId(R.id.action_top_movies);
+                    break;
+                }
+                case "now_playing": {
+                    bottomNavBar.setSelectedItemId(R.id.action_now_playing);
+                    break;
+                }
+            }
+        }
+        else {
+            bottomNavBar.setSelectedItemId(R.id.action_top_movies);
+        }
 
         //if keyboard is showing set bottomNavigationBar's visibility to GONE
         final ConstraintLayout constraintLayout = view.findViewById(R.id.rootView);

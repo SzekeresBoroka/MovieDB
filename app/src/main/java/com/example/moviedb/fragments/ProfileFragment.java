@@ -1,13 +1,9 @@
-package com.example.moviedb;
+package com.example.moviedb.fragments;
 
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +13,12 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+
+import com.example.moviedb.MainActivity;
+import com.example.moviedb.R;
+
 public class ProfileFragment extends Fragment {
 
     private Context context;
@@ -25,6 +27,8 @@ public class ProfileFragment extends Fragment {
     public void onCreate (Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getActivity();
+
+        ((MainActivity) context).setTitle("Profile");
     }
 
     @Override
