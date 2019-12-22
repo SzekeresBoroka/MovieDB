@@ -1,6 +1,7 @@
 package com.example.moviedb.api;
 
 import com.example.moviedb.models.MovieResponse;
+import com.example.moviedb.models.VideoResponse;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -15,6 +16,17 @@ public interface ApiService {
             @Query("api_key") String api_key,
             @Query("language") String language,
             @Query("page") int page
+    );
+
+    @GET("movie/popular")
+    Call<MovieResponse> getPopularMovies(
+            @Query("api_key") String api_key
+    );
+
+    @GET("movie/{movie_id}/videos")
+    Call<VideoResponse> getVideos(
+            @Path("movie_id") int movie_id,
+            @Query("api_key") String api_key
     );
 
 }

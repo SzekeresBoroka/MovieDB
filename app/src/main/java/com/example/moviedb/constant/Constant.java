@@ -1,11 +1,10 @@
 package com.example.moviedb.constant;
 
-import com.example.moviedb.BuildConfig;
-
 public class Constant {
 
     public static final String BASE_URL = "https://api.themoviedb.org/3/";
-    public static final String API_KEY = BuildConfig.API_KEY;
+    //public static final String API_KEY = BuildConfig.API_KEY;
+    public static final String API_KEY = "d8225a3698dc5bf7512e139a41458475";
     public static final String LANGUAGE = "en-IN";
 
     public static final String IMAGE_SIZE = "w500";

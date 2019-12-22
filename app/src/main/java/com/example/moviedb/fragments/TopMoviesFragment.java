@@ -56,6 +56,22 @@ public class TopMoviesFragment extends Fragment {
             }
         });
 
+        /*ApiService service = ApiClient.getInstance().getApiService();
+        Call<MovieResponse> call = service.getPopularMovies(Constant.API_KEY);
+        call.enqueue(new Callback<MovieResponse>() {
+            @Override
+            public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
+                movies = response.body().getResults();
+                adapter = new PopularMoviesAdapter(context, movies);
+                recyclerView.setAdapter(adapter);
+            }
+
+            @Override
+            public void onFailure(Call<MovieResponse> call, Throwable t) {
+
+            }
+        });*/
+
         return view;
     }
 

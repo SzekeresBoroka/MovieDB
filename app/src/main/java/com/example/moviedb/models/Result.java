@@ -161,5 +161,4 @@ public class Result {
     public void setReleaseDate(String releaseDate) {
         this.releaseDate = releaseDate;
     }
-
 }
