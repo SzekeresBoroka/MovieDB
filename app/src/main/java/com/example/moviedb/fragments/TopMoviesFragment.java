@@ -3,6 +3,7 @@ package com.example.moviedb.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,26 +52,11 @@ public class TopMoviesFragment extends Fragment {
             @Override
             public void onChanged(PagedList<Result> results) {
                 if(results != null){
+                    Log.d("kereshiba","result.size: " + results.size());
                     adapter.submitList(results);
                 }
             }
         });
-
-        /*ApiService service = ApiClient.getInstance().getApiService();
-        Call<MovieResponse> call = service.getPopularMovies(Constant.API_KEY);
-        call.enqueue(new Callback<MovieResponse>() {
-            @Override
-            public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
-                movies = response.body().getResults();
-                adapter = new PopularMoviesAdapter(context, movies);
-                recyclerView.setAdapter(adapter);
-            }
-
-            @Override
-            public void onFailure(Call<MovieResponse> call, Throwable t) {
-
-            }
-        });*/
 
         return view;
     }

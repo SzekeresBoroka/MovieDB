@@ -8,7 +8,7 @@ import static com.example.moviedb.constant.Constant.BASE_URL;
 public class ApiClient {
 
     private static Retrofit retrofit = null;
-    private static ApiClient instatnce;
+    private static ApiClient instance;
 
     public ApiClient(){
         if(retrofit == null){
@@ -20,21 +20,11 @@ public class ApiClient {
     }
 
     public static synchronized ApiClient getInstance(){
-        if(instatnce == null){
-            instatnce = new ApiClient();
+        if(instance == null){
+            instance = new ApiClient();
         }
-        return instatnce;
+        return instance;
     }
-
-    /*public static Retrofit getInstance(){
-        if(retrofit == null){
-            retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-        }
-        return retrofit;
-    }*/
 
     public static ApiService getApiService(){
         return retrofit.create(ApiService.class);

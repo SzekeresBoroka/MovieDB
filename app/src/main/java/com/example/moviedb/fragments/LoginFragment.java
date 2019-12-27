@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.example.moviedb.DbHelper;
 import com.example.moviedb.MainActivity;
 import com.example.moviedb.R;
 

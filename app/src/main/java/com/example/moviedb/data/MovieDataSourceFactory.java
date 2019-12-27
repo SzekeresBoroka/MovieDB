@@ -22,6 +22,7 @@ public class MovieDataSourceFactory extends DataSource.Factory<Integer, Result> 
     public DataSource<Integer, Result> create() {
         dataSource = new MovieDataSource(sort_criteria);
         liveData = new MutableLiveData<>();
+        liveData.postValue(dataSource);
         return dataSource;
     }
 }

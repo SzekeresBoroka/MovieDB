@@ -2,6 +2,9 @@ package com.example.moviedb.adapters;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +16,7 @@ import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.moviedb.DbHelper;
 import com.example.moviedb.MainActivity;
 import com.example.moviedb.R;
 import com.example.moviedb.databinding.ItemsRvTopMoviesBinding;
@@ -30,6 +34,7 @@ import static com.example.moviedb.constant.Constant.IMAGE_URL;
 public class TopMoviesAdapter extends PagedListAdapter<Result, TopMoviesAdapter.MViewModel> {
 
     private Context context;
+    private DbHelper db;
 
     public static DiffUtil.ItemCallback<Result> diffCallback = new DiffUtil.ItemCallback<Result>() {
         @Override
@@ -47,6 +52,7 @@ public class TopMoviesAdapter extends PagedListAdapter<Result, TopMoviesAdapter.
     public TopMoviesAdapter(Context context) {
         super(diffCallback);
         this.context = context;
+        db = new DbHelper(context);
     }
 
     @NonNull
@@ -78,7 +84,7 @@ public class TopMoviesAdapter extends PagedListAdapter<Result, TopMoviesAdapter.
             itemsBinding = videoItemsBinding;
         }
 
-        public void bind(Result item, int nr) {
+        public void bind(final Result item, int nr) {
             if(item != null){
                 String posterUrl = IMAGE_URL + IMAGE_SIZE + item.getBackdropPath();
                 Picasso.get().load(posterUrl).into(itemsBinding.ivPoster);
@@ -100,6 +106,29 @@ public class TopMoviesAdapter extends PagedListAdapter<Result, TopMoviesAdapter.
                     shortDescription = item.getOverview();
                 }
                 itemsBinding.tvDescription.setText(shortDescription);
+
+                SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+                final String username = sharedPref.getString(context.getString(R.string.active_user),"Active User");
+
+                if(db.movieIsSaved(username, item.getId())){
+                    itemsBinding.imgBtnLike.setColorFilter(Color.rgb(0,0,0));
+                }
+                else{
+                    itemsBinding.imgBtnLike.setColorFilter(Color.rgb(192,192,192));
+                }
+
+                itemsBinding.imgBtnLike.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        db.saveMovie(username, item);
+                        if(db.movieIsSaved(username, item.getId())){
+                            itemsBinding.imgBtnLike.setColorFilter(Color.rgb(0,0,0));
+                        }
+                        else{
+                            itemsBinding.imgBtnLike.setColorFilter(Color.rgb(192,192,192));
+                        }
+                    }
+                });
             }
         }
     }
