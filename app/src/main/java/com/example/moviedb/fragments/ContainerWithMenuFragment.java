@@ -40,9 +40,9 @@ public class ContainerWithMenuFragment extends Fragment {
                 switch (item.getItemId()) {
                     case R.id.action_now_playing: {
                         bottomNavBar.getMenu().getItem(0).setChecked(true);
-                       /* FragmentTransaction frag_trans = ((MainActivity) context).getSupportFragmentManager().beginTransaction();
-                        frag_trans.replace(R.id.fragment_container_with_menu,new NowPlayingFragment());
-                        frag_trans.commit();*/
+                        FragmentTransaction frag_trans = ((MainActivity) context).getSupportFragmentManager().beginTransaction();
+                        frag_trans.replace(R.id.fragment_container_with_menu,new NowPlayingMoviesFragment());
+                        frag_trans.commit();
                         break;
                     }
                     case R.id.action_top_movies: {
@@ -54,9 +54,9 @@ public class ContainerWithMenuFragment extends Fragment {
                     }
                     case R.id.action_favourites: {
                         bottomNavBar.getMenu().getItem(2).setChecked(true);
-                       /* FragmentTransaction frag_trans = ((MainActivity) context).getSupportFragmentManager().beginTransaction();
+                        FragmentTransaction frag_trans = ((MainActivity) context).getSupportFragmentManager().beginTransaction();
                         frag_trans.replace(R.id.fragment_container_with_menu,new FavouritesFragment());
-                        frag_trans.commit();*/
+                        frag_trans.commit();
                         break;
                     }
                     case R.id.action_profile: {

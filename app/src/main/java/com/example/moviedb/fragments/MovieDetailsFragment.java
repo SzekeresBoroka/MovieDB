@@ -116,7 +116,7 @@ public class MovieDetailsFragment extends Fragment {
             public void onResponse(Call<ImageResponse> call, Response<ImageResponse> response) {
                 List<ImageResult> images = response.body().getBackdrops();
 
-                ImagesAdapter adapter = new ImagesAdapter(images, context);
+                ImagesAdapter adapter = new ImagesAdapter(images, context, view);
                 rv_images.setAdapter(adapter);
             }
 

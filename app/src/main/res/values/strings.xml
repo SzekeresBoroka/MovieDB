@@ -16,4 +16,5 @@
     <string name="cancel_text">Cancel</string>
     <string name="similar_movies_text">Similar Movies</string>
     <string name="description_text">Description</string>
+    <string name="photos_text">Photos</string>
 </resources>

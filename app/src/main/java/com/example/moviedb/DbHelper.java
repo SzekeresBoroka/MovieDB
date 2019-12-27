@@ -11,6 +11,8 @@ import androidx.annotation.Nullable;
 
 import com.example.moviedb.models.Result;
 
+import java.util.ArrayList;
+
 public class DbHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "MovieDB";
@@ -26,6 +28,7 @@ public class DbHelper extends SQLiteOpenHelper {
     private static final String FAVOURITES_COLUMN_MOVIE_TITLE = "MovieTitle";
     private static final String FAVOURITES_COLUMN_MOVIE_DATE = "MovieDate";
     private static final String FAVOURITES_COLUMN_MOVIE_DESCRIPTION = "MovieDescription";
+    private static final String FAVOURITES_COLUMN_MOVIE_POSTER = "MoviePoster";
 
     public DbHelper(@Nullable Context context) {
         super(context, DATABASE_NAME, null, 1);
@@ -43,7 +46,8 @@ public class DbHelper extends SQLiteOpenHelper {
                 FAVOURITES_COLUMN_MOVIE_ID + " INTEGER, " +
                 FAVOURITES_COLUMN_MOVIE_TITLE + " TEXT, " +
                 FAVOURITES_COLUMN_MOVIE_DATE + " TEXT, " +
-                FAVOURITES_COLUMN_MOVIE_DESCRIPTION + " TEXT);");
+                FAVOURITES_COLUMN_MOVIE_DESCRIPTION + " TEXT," +
+                FAVOURITES_COLUMN_MOVIE_POSTER + " TEXT);");
     }
 
     @Override
@@ -69,6 +73,18 @@ public class DbHelper extends SQLiteOpenHelper {
 
     public boolean userExists(String userName){
         SQLiteDatabase db = this.getWritableDatabase();
+
+        /*db.execSQL("DROP TABLE IF EXISTS " + TABLE_FAVOURITES);
+
+        db.execSQL("CREATE TABLE " + TABLE_FAVOURITES + " (" +
+                FAVOURITES_COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                FAVOURITES_COLUMN_USERNAME + " TEXT, " +
+                FAVOURITES_COLUMN_MOVIE_ID + " INTEGER, " +
+                FAVOURITES_COLUMN_MOVIE_TITLE + " TEXT, " +
+                FAVOURITES_COLUMN_MOVIE_DATE + " TEXT, " +
+                FAVOURITES_COLUMN_MOVIE_DESCRIPTION + " TEXT," +
+                FAVOURITES_COLUMN_MOVIE_POSTER + " TEXT);");*/
+
         Cursor res = db.rawQuery("select 1 from " + TABLE_USERS + " where " + USERS_COLUMN_USERNAME + " = \"" + userName + "\"",null);
         if(res.getCount()==0) {
             return false;
@@ -134,6 +150,7 @@ public class DbHelper extends SQLiteOpenHelper {
         contentValues.put(FAVOURITES_COLUMN_MOVIE_TITLE, movie.getTitle());
         contentValues.put(FAVOURITES_COLUMN_MOVIE_DATE, movie.getReleaseDate());
         contentValues.put(FAVOURITES_COLUMN_MOVIE_DESCRIPTION, movie.getOverview());
+        contentValues.put(FAVOURITES_COLUMN_MOVIE_POSTER, movie.getBackdropPath());
 
         long result = db.insert(TABLE_FAVOURITES,null, contentValues);
         if (result == -1)
@@ -152,5 +169,21 @@ public class DbHelper extends SQLiteOpenHelper {
         else {
             return true;
         }
+    }
+
+    public ArrayList<Result> getFavourites(String username){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ArrayList<Result> favourites = new ArrayList<>();
+        Cursor res = db.rawQuery("select * from " + TABLE_FAVOURITES + " where " + FAVOURITES_COLUMN_USERNAME + " = \"" + username + "\"",null);
+        while(res.moveToNext()){
+            Result movie = new Result();
+            movie.setId(res.getInt(2));
+            movie.setTitle(res.getString(3));
+            movie.setReleaseDate(res.getString(4));
+            movie.setOverview(res.getString(5));
+            movie.setBackdropPath(res.getString(6));
+            favourites.add(movie);
+        }
+        return favourites;
     }
 }
