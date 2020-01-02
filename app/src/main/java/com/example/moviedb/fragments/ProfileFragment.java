@@ -2,7 +2,9 @@ package com.example.moviedb.fragments;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -40,6 +42,7 @@ public class ProfileFragment extends Fragment {
         final ImageButton imgBtn_saveUserName = view.findViewById(R.id.imgBtn_saveUsername);
         final ImageButton imgBtn_changeUsername = view.findViewById(R.id.imgBtn_changeUserName);
         final ImageButton imgBtn_cancel = view.findViewById(R.id.imgBtn_cancel);
+        ImageButton imgBtn_changeProfilePicture = view.findViewById(R.id.imgBtn_changeProfilePicture);
         Button btn_changePassword = view.findViewById(R.id.btn_changePassword);
 
         final SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
@@ -47,6 +50,20 @@ public class ProfileFragment extends Fragment {
         et_userName.setText(oldUsername);
         et_userName.setFocusable(false);
         et_userName.setFocusableInTouchMode(false);
+
+        DbHelper db = new DbHelper(context);
+        Uri imageUri = db.getProfilePicture(oldUsername);
+        /*if(!imageUri.equals("")) {
+            final InputStream imageStream;
+            try {
+                imageStream = context.getContentResolver().openInputStream(imageUri);
+                Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                ImageView iv_profilePicture = view.findViewById(R.id.img_profilePicture);
+                iv_profilePicture.setImageBitmap(selectedImage);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }*/
 
         imgBtn_changeUsername.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,6 +125,15 @@ public class ProfileFragment extends Fragment {
                 FragmentTransaction frag_trans = ((MainActivity) context).getSupportFragmentManager().beginTransaction();
                 frag_trans.replace(R.id.fragment_container_without_menu,new ChangePasswordFragment());
                 frag_trans.commit();
+            }
+        });
+
+        imgBtn_changeProfilePicture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+                photoPickerIntent.setType("image/*");
+                ((MainActivity) context).startActivityForResult(photoPickerIntent, 1);
             }
         });
 

@@ -71,7 +71,7 @@ public class TopMoviesAdapter extends PagedListAdapter<Result, TopMoviesAdapter.
             @Override
             public void onClick(View v) {
                 FragmentTransaction frag_trans = ((MainActivity) context).getSupportFragmentManager().beginTransaction();
-                frag_trans.replace(R.id.fragment_container_without_menu, new MovieDetailsFragment(getItem(position)));
+                frag_trans.replace(R.id.fragment_container_without_menu, new MovieDetailsFragment(getItem(position), "Internet"));
                 frag_trans.commit();
             }
         });

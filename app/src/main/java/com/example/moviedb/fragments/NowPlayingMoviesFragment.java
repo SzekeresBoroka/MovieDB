@@ -14,6 +14,7 @@ import androidx.paging.PagedList;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.moviedb.MainActivity;
 import com.example.moviedb.R;
 import com.example.moviedb.adapters.TopMoviesAdapter;
 import com.example.moviedb.models.Result;
@@ -28,6 +29,7 @@ public class NowPlayingMoviesFragment extends Fragment {
     public void onCreate (Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getActivity();
+        ((MainActivity) context).setTitle("Now Playing Movies");
     }
 
 
@@ -36,7 +38,7 @@ public class NowPlayingMoviesFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_now_playing_movies, container, false);
 
         String sort_criteria = "now_playing";
-        MainViewModel viewModel = ViewModelProviders.of(this, new MainViewModelFactory(sort_criteria)).get(MainViewModel.class);
+        MainViewModel viewModel = ViewModelProviders.of(this, new MainViewModelFactory(sort_criteria, "")).get(MainViewModel.class);
 
         RecyclerView recyclerView = view.findViewById(R.id.rv_nowPlayingMovies);
         LinearLayoutManager layoutManager = new LinearLayoutManager(context);

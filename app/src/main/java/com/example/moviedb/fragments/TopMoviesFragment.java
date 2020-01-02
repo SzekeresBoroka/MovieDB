@@ -3,12 +3,16 @@ package com.example.moviedb.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SearchView;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.paging.PagedList;
@@ -25,12 +29,21 @@ import com.example.moviedb.viewmodels.MainViewModelFactory;
 public class TopMoviesFragment extends Fragment {
 
     private Context context;
+    private String search_key = "";
+
+    public TopMoviesFragment() {
+    }
+
+    public TopMoviesFragment(String search_key) {
+        this.search_key = search_key;
+    }
 
     @Override
     public void onCreate (Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getActivity();
         ((MainActivity) context).setTitle("Top Movies");
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -39,10 +52,10 @@ public class TopMoviesFragment extends Fragment {
 
         String sort_criteria = "popular";
         //String sort_criteria = "top_rated";
-        MainViewModel viewModel = ViewModelProviders.of(this, new MainViewModelFactory(sort_criteria)).get(MainViewModel.class);
+        MainViewModel viewModel = ViewModelProviders.of(this, new MainViewModelFactory(sort_criteria, search_key)).get(MainViewModel.class);
 
         RecyclerView recyclerView = view.findViewById(R.id.rv_top_movies);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(context);
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(context);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
 
@@ -59,6 +72,31 @@ public class TopMoviesFragment extends Fragment {
         });
 
         return view;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.search_menu, menu);
+        //super.onCreateOptionsMenu(menu, inflater);
+        MenuItem item = menu.findItem(R.id.search);
+        SearchView searchView = (SearchView) item.getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                if(query.isEmpty()){
+                    return false;
+                }
+                FragmentTransaction frag_trans = ((MainActivity) context).getSupportFragmentManager().beginTransaction();
+                frag_trans.replace(R.id.fragment_container_with_menu,new TopMoviesFragment(query));
+                frag_trans.commit();
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
     }
 
 }

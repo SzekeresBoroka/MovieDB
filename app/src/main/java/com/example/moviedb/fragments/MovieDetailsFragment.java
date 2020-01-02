@@ -2,7 +2,10 @@ package com.example.moviedb.fragments;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,6 +23,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.moviedb.DbHelper;
 import com.example.moviedb.MainActivity;
 import com.example.moviedb.R;
 import com.example.moviedb.adapters.ImagesAdapter;
@@ -43,10 +47,11 @@ import retrofit2.Response;
 public class MovieDetailsFragment extends Fragment {
     private Result movie;
     private Context context;
-    private String title;
+    private String title, viewType;
 
-    public MovieDetailsFragment(Result movie) {
+    public MovieDetailsFragment(Result movie, String viewType) {
         this.movie = movie;
+        this.viewType = viewType;
     }
 
     @Override
@@ -69,6 +74,110 @@ public class MovieDetailsFragment extends Fragment {
         TextView tv_description = view.findViewById(R.id.tv_description);
         tv_description.setText(movie.getOverview());
 
+        if(viewType.equals("Saved")){
+            savedMovieDetails(view);
+        }
+        if(viewType.equals("Internet")){
+            movieDetailsFromInternet(view);
+        }
+
+        ImageButton imgBtn_close = view.findViewById(R.id.imgBtn_close);
+        imgBtn_close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ContainerWithMenuFragment containerWithMenuFragment = new ContainerWithMenuFragment();
+                Bundle args = new Bundle();
+                args.putString("fragmentToOpen", "top_movies");
+                containerWithMenuFragment.setArguments(args);
+
+                FragmentTransaction frag_trans = ((MainActivity) context).getSupportFragmentManager().beginTransaction();
+                frag_trans.replace(R.id.fragment_container_without_menu, containerWithMenuFragment);
+                frag_trans.commit();
+            }
+        });
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+        final String username = sharedPref.getString(context.getString(R.string.active_user),"Active User");
+
+        final DbHelper db = new DbHelper(context);
+
+        final ImageButton imgBtnLike = view.findViewById(R.id.imgBtn_like);
+
+        if(db.movieIsSaved(username, movie.getId())){
+            imgBtnLike.setColorFilter(Color.rgb(0,0,0));
+        }
+        else{
+            imgBtnLike.setColorFilter(Color.rgb(192,192,192));
+        }
+
+        imgBtnLike.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                db.saveMovie(username, movie);
+                if(db.movieIsSaved(username, movie.getId())){
+                    imgBtnLike.setColorFilter(Color.rgb(0,0,0));
+                }
+                else{
+                    imgBtnLike.setColorFilter(Color.rgb(192,192,192));
+                }
+            }
+        });
+
+        return view;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.movie_details_top_menu, menu);
+        //super.onCreateOptionsMenu(menu, inflater);
+        ((MainActivity) context).setTitle(title);
+    }
+
+    // handle button activities
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.close: {
+                ContainerWithMenuFragment containerWithMenuFragment = new ContainerWithMenuFragment();
+                Bundle args = new Bundle();
+                args.putString("fragmentToOpen", "top_movies");
+                containerWithMenuFragment.setArguments(args);
+
+                FragmentTransaction frag_trans = ((MainActivity) context).getSupportFragmentManager().beginTransaction();
+                frag_trans.replace(R.id.fragment_container_without_menu, containerWithMenuFragment);
+                frag_trans.commit();
+            }
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void savedMovieDetails(View view){
+        int movie_id = movie.getId();
+        DbHelper db = new DbHelper(context);
+
+        VideoResult video = db.getVideo(movie_id);
+        WebView displayYoutubeVideo = view.findViewById(R.id.vv_trailer);
+        displayYoutubeVideo.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                return false;
+            }
+        });
+        WebSettings webSettings = displayYoutubeVideo.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        displayYoutubeVideo.loadUrl("https://www.youtube.com/embed/" + video.getKey());
+
+        RecyclerView rv_images = view.findViewById(R.id.rv_images);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,false);
+        rv_images.setLayoutManager(layoutManager);
+        rv_images.setHasFixedSize(true);
+
+        List<ImageResult> images = db.getImages(movie_id);
+        ImagesAdapter adapter = new ImagesAdapter(images, context, view);
+        rv_images.setAdapter(adapter);
+    }
+
+    private void movieDetailsFromInternet(final View view){
         int movie_id = movie.getId();
         String api_key = Constant.API_KEY;
         ApiService service = ApiClient.getInstance().getApiService();
@@ -146,48 +255,6 @@ public class MovieDetailsFragment extends Fragment {
 
             }
         });
-
-        ImageButton imgBtn_close = view.findViewById(R.id.imgBtn_close);
-        imgBtn_close.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ContainerWithMenuFragment containerWithMenuFragment = new ContainerWithMenuFragment();
-                Bundle args = new Bundle();
-                args.putString("fragmentToOpen", "top_movies");
-                containerWithMenuFragment.setArguments(args);
-
-                FragmentTransaction frag_trans = ((MainActivity) context).getSupportFragmentManager().beginTransaction();
-                frag_trans.replace(R.id.fragment_container_without_menu, containerWithMenuFragment);
-                frag_trans.commit();
-            }
-        });
-
-        return view;
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.movie_details_top_menu, menu);
-        super.onCreateOptionsMenu(menu, inflater);
-        ((MainActivity) context).setTitle(title);
-    }
-
-    // handle button activities
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.close: {
-                ContainerWithMenuFragment containerWithMenuFragment = new ContainerWithMenuFragment();
-                Bundle args = new Bundle();
-                args.putString("fragmentToOpen", "top_movies");
-                containerWithMenuFragment.setArguments(args);
-
-                FragmentTransaction frag_trans = ((MainActivity) context).getSupportFragmentManager().beginTransaction();
-                frag_trans.replace(R.id.fragment_container_without_menu, containerWithMenuFragment);
-                frag_trans.commit();
-            }
-        }
-        return super.onOptionsItemSelected(item);
     }
 
 }

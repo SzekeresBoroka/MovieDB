@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel;
 import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
 
-import com.example.moviedb.data.MovieDataSource;
 import com.example.moviedb.data.MovieDataSourceFactory;
 import com.example.moviedb.models.Result;
 
@@ -19,15 +18,16 @@ import static com.example.moviedb.constant.Constant.Prefetch_Distance;
 
 public class MainViewModel extends ViewModel {
 
-    private String sort_criteria;
+    private String sort_criteria, search_key;
     private LiveData<PagedList<Result>> listLiveData;
 
-    public MainViewModel(String sort_criteria) {
+    public MainViewModel(String sort_criteria, String search_key) {
         this.sort_criteria = sort_criteria;
+        this.search_key = search_key;
 
         Executor executor = Executors.newFixedThreadPool(NUMBER_OF_THREAD_FIVE);
 
-        MovieDataSourceFactory sourceFactory = new MovieDataSourceFactory(sort_criteria);
+        MovieDataSourceFactory sourceFactory = new MovieDataSourceFactory(sort_criteria, search_key);
 
         PagedList.Config config = new PagedList.Config.Builder()
                 .setEnablePlaceholders(false)
