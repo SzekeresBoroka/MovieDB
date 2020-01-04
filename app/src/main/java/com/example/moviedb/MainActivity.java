@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
                         String userName = sharedPref.getString(getString(R.string.active_user),"Active User");
 
                         DbHelper db = new DbHelper(this);
-                        db.saveProfilePicture(userName, imageUri);
+                        db.saveProfilePicture(userName, selectedImage);
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     }

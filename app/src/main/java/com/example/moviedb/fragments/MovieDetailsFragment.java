@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,6 +18,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.VideoView;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -157,15 +159,11 @@ public class MovieDetailsFragment extends Fragment {
 
         VideoResult video = db.getVideo(movie_id);
         WebView displayYoutubeVideo = view.findViewById(R.id.vv_trailer);
-        displayYoutubeVideo.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                return false;
-            }
-        });
-        WebSettings webSettings = displayYoutubeVideo.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        displayYoutubeVideo.loadUrl("https://www.youtube.com/embed/" + video.getKey());
+        VideoView videoView = view.findViewById(R.id.videoView);
+        displayYoutubeVideo.setVisibility(View.GONE);
+        videoView.setVisibility(View.VISIBLE);
+        //videoView.setVideoURI(Uri.parse(video.getKey()));
+        Log.d("hiba", "video url: " + video.getKey());
 
         RecyclerView rv_images = view.findViewById(R.id.rv_images);
         LinearLayoutManager layoutManager = new LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,false);
@@ -173,8 +171,11 @@ public class MovieDetailsFragment extends Fragment {
         rv_images.setHasFixedSize(true);
 
         List<ImageResult> images = db.getImages(movie_id);
-        ImagesAdapter adapter = new ImagesAdapter(images, context, view);
+        ImagesAdapter adapter = new ImagesAdapter(images, context, view, "saved");
         rv_images.setAdapter(adapter);
+
+        TextView similarMovies_label = view.findViewById(R.id.similar_movies_label);
+        similarMovies_label.setVisibility(View.GONE);
     }
 
     private void movieDetailsFromInternet(final View view){
@@ -196,6 +197,9 @@ public class MovieDetailsFragment extends Fragment {
                 }
 
                 WebView displayYoutubeVideo = view.findViewById(R.id.vv_trailer);
+                VideoView videoView = view.findViewById(R.id.videoView);
+                displayYoutubeVideo.setVisibility(View.VISIBLE);
+                videoView.setVisibility(View.GONE);
                 displayYoutubeVideo.setWebViewClient(new WebViewClient() {
                     @Override
                     public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -234,6 +238,9 @@ public class MovieDetailsFragment extends Fragment {
 
             }
         });
+
+        TextView similarMovies_label = view.findViewById(R.id.similar_movies_label);
+        similarMovies_label.setVisibility(View.VISIBLE);
 
         final RecyclerView rv_similar_movies = view.findViewById(R.id.rv_similarMovies);
         LinearLayoutManager layoutManager_similar_movies = new LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,false);

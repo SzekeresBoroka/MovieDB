@@ -17,4 +17,5 @@
     <string name="similar_movies_text">Similar Movies</string>
     <string name="description_text">Description</string>
     <string name="photos_text">Photos</string>
+    <string name="no_data_text">Turn on the internet to see top movies</string>
 </resources>

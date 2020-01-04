@@ -1,6 +1,9 @@
 package com.example.moviedb.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +18,9 @@ import com.example.moviedb.R;
 import com.example.moviedb.models.ImageResult;
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.List;
 
 import static com.example.moviedb.constant.Constant.IMAGE_SIZE;
@@ -24,11 +30,20 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.MyViewHold
     private List<ImageResult> images;
     private Context context;
     private View rootView;
+    private String type;
 
     public ImagesAdapter(List<ImageResult> images, Context context, View rootView) {
         this.images = images;
         this.context = context;
         this.rootView = rootView;
+        this.type = "internet";
+    }
+
+    public ImagesAdapter(List<ImageResult> images, Context context, View rootView, String type) {
+        this.images = images;
+        this.context = context;
+        this.rootView = rootView;
+        this.type = type;
     }
 
     @NonNull
@@ -40,11 +55,23 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.MyViewHold
     }
 
     @Override
-    public void onBindViewHolder(ImagesAdapter.MyViewHolder viewHolder, int i) {
-        ImageResult image = images.get(i);
+    public void onBindViewHolder(final ImagesAdapter.MyViewHolder viewHolder, int i) {
+        final ImageResult image = images.get(i);
 
-        final String imageUrl = IMAGE_URL + IMAGE_SIZE + image.getFilePath();
-        Picasso.get().load(imageUrl).into(viewHolder.image);
+        if(type.equals("internet")) {
+            String imageUrl = IMAGE_URL + IMAGE_SIZE + image.getFilePath();
+            Picasso.get().load(imageUrl).into(viewHolder.image);
+        }else{
+            try {
+                String imageUrl = image.getFilePath();
+                File f=new File(imageUrl);
+                Bitmap selectedImage = BitmapFactory.decodeStream(new FileInputStream(f));
+                viewHolder.image.setImageBitmap(selectedImage);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                Log.d("hiba", e.getMessage());
+            }
+        }
 
         viewHolder.image.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,7 +82,21 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.MyViewHold
                 ((MainActivity) context).getSupportActionBar().hide();
                 imgBtn_closeImage.setVisibility(View.VISIBLE);
                 iv_fullImage.setVisibility(View.VISIBLE);
-                Picasso.get().load(imageUrl).into(iv_fullImage);
+                if(type.equals("internet")) {
+                    String imageUrl = IMAGE_URL + IMAGE_SIZE + image.getFilePath();
+                    Picasso.get().load(imageUrl).into(iv_fullImage);
+                }else{
+                    try {
+                        String imageUrl = image.getFilePath();
+                        File f=new File(imageUrl);
+                        Bitmap selectedImage = BitmapFactory.decodeStream(new FileInputStream(f));
+                        iv_fullImage.setImageBitmap(selectedImage);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                        Log.d("hiba", e.getMessage());
+                    }
+                }
+
 
                 imgBtn_closeImage.setOnClickListener(new View.OnClickListener() {
                     @Override

@@ -5,8 +5,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.net.Uri;
-import android.util.Log;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 import androidx.annotation.Nullable;
 
@@ -19,6 +19,13 @@ import com.example.moviedb.models.Result;
 import com.example.moviedb.models.VideoResponse;
 import com.example.moviedb.models.VideoResult;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,8 +33,12 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.example.moviedb.constant.Constant.IMAGE_SIZE;
+import static com.example.moviedb.constant.Constant.IMAGE_URL;
+
 public class DbHelper extends SQLiteOpenHelper {
 
+    private Context context;
     private static final String DATABASE_NAME = "MovieDB";
 
     private static final String TABLE_USERS = "Users";
@@ -58,6 +69,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
     public DbHelper(@Nullable Context context) {
         super(context, DATABASE_NAME, null, 1);
+        this.context = context;
     }
 
     @Override
@@ -117,14 +129,14 @@ public class DbHelper extends SQLiteOpenHelper {
 
     public boolean userExists(String userName){
         SQLiteDatabase db = this.getWritableDatabase();
-
-        /*db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
+        /*
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_FAVOURITES);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_MOVIES);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_IMAGES);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_VIDEOS);
-            onCreate(db);*/
-
+            onCreate(db);
+        */
         Cursor res = db.rawQuery("select 1 from " + TABLE_USERS + " where " + USERS_COLUMN_USERNAME + " = \"" + userName + "\"",null);
         if(res.getCount()==0) {
             return false;
@@ -173,11 +185,13 @@ public class DbHelper extends SQLiteOpenHelper {
             return true;
     }
 
-    public  boolean saveProfilePicture(String username, Uri uri){
+    public  boolean saveProfilePicture(String username, Bitmap image){
         SQLiteDatabase db = this.getWritableDatabase();
 
+        String imagePath = saveToInternalStorage(image, "profile.jpg");
+
         ContentValues contentValues = new ContentValues();
-        contentValues.put(USERS_COLUMN_PROFILE_PICTURE, uri.toString());
+        contentValues.put(USERS_COLUMN_PROFILE_PICTURE, imagePath);
 
         long result = db.update(TABLE_USERS, contentValues, USERS_COLUMN_USERNAME + " = \"" + username + "\"", null);
         if (result == -1)
@@ -186,15 +200,17 @@ public class DbHelper extends SQLiteOpenHelper {
             return true;
     }
 
-    public Uri getProfilePicture(String username){
+    public String getProfilePicture(String username){
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor res = db.rawQuery("select " + USERS_COLUMN_PROFILE_PICTURE +" from " + TABLE_USERS + " where " + USERS_COLUMN_USERNAME + " = \"" + username + "\"",null);
         if(res.getCount()==0) {
-            return Uri.parse("");
+            //return Uri.parse("");
+            return "";
         }
         else {
             res.moveToNext();
-            return Uri.parse(res.getString(0));
+            //return Uri.parse(res.getString(0));
+            return res.getString(0);
         }
     }
 
@@ -202,7 +218,6 @@ public class DbHelper extends SQLiteOpenHelper {
         final SQLiteDatabase db = this.getWritableDatabase();
 
         if(movieIsSaved(userName, movie.getId())){
-            Log.d("ellenorzes: ", "movie deleted");
             db.execSQL("delete from " + TABLE_FAVOURITES + " where " + FAVOURITES_COLUMN_USERNAME + " = \"" + userName + "\" and " + FAVOURITES_COLUMN_MOVIE_ID + " = " + movie.getId());
 
             if(!movieIsSaved(movie.getId())){
@@ -210,7 +225,6 @@ public class DbHelper extends SQLiteOpenHelper {
             }
             return true;
         }
-        Log.d("ellenorzes: ", "movie saved");
 
         if(movieIsSaved(movie.getId())){
             //save only to favourites
@@ -246,13 +260,30 @@ public class DbHelper extends SQLiteOpenHelper {
             call_images.enqueue(new Callback<ImageResponse>() {
                 @Override
                 public void onResponse(Call<ImageResponse> call, Response<ImageResponse> response) {
-                    List<ImageResult> images = response.body().getBackdrops();
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put(IMAGES_COLUMN_MOVIE_ID, movie.getId());
-                    for(ImageResult img : images){
-                        contentValues.put(IMAGES_COLUMN_IMAGE_PATH, img.getFilePath());
-                    }
-                    long result3 = db.insert(TABLE_MOVIES,null, contentValues);
+                    final List<ImageResult> images = response.body().getBackdrops();
+                    Thread thread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            for(ImageResult img : images){
+                                ContentValues contentValues = new ContentValues();
+                                contentValues.put(IMAGES_COLUMN_MOVIE_ID, movie.getId());
+                                String imageUrl = IMAGE_URL + IMAGE_SIZE + img.getFilePath();
+                                Bitmap bitmap = null;
+                                InputStream inputStream;
+                                try {
+                                    inputStream = new java.net.URL(imageUrl).openStream();
+                                    bitmap = BitmapFactory.decodeStream(inputStream);
+                                    inputStream.close();
+                                    String imagePath = saveToInternalStorage(bitmap, img.getFilePath());
+                                    contentValues.put(IMAGES_COLUMN_IMAGE_PATH, imagePath);
+                                    long result3 = db.insert(TABLE_IMAGES,null, contentValues);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    });
+                    thread.start();
                 }
                 @Override
                 public void onFailure(Call<ImageResponse> call, Throwable t) {
@@ -265,14 +296,20 @@ public class DbHelper extends SQLiteOpenHelper {
                 @Override
                 public void onResponse(Call<VideoResponse> call, Response<VideoResponse> response) {
                     List<VideoResult> videos = response.body().getResults();
-                    String key = "";
                     for (VideoResult video: videos) {
                         if(video.getType().equals("Trailer")){
-                            key = video.getKey();
-                            ContentValues contentValues = new ContentValues();
-                            contentValues.put(VIDEOS_COLUMN_MOVIE_ID, movie.getId());
-                            contentValues.put(VIDEOS_COLUMN_VIDEO_PATH, key);
-                            long result4 = db.insert(TABLE_VIDEOS,null, contentValues);
+                            final String key = video.getKey();
+                            Thread thread = new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    String videoPath = saveVideoToInternalStorage(key);
+                                    ContentValues contentValues = new ContentValues();
+                                    contentValues.put(VIDEOS_COLUMN_MOVIE_ID, movie.getId());
+                                    contentValues.put(VIDEOS_COLUMN_VIDEO_PATH, videoPath);
+                                    long result4 = db.insert(TABLE_VIDEOS,null, contentValues);
+                                }
+                            });
+                            thread.start();
                             break;
                         }
                     }
@@ -294,6 +331,11 @@ public class DbHelper extends SQLiteOpenHelper {
 
     private void deleteMovieDetails(int movieId){
         SQLiteDatabase db = this.getWritableDatabase();
+        ArrayList<ImageResult> images = getImages(movieId);
+        for(ImageResult img: images){
+            File file = new File(img.getFilePath());
+            file.delete();
+        }
         db.execSQL("delete from " + TABLE_MOVIES + " where " + MOVIES_COLUMN_ID + " = " + movieId);
         db.execSQL("delete from " + TABLE_IMAGES + " where " + IMAGES_COLUMN_MOVIE_ID + " = " + movieId);
         db.execSQL("delete from " + TABLE_VIDEOS + " where " + VIDEOS_COLUMN_MOVIE_ID + " = " + movieId);
@@ -370,4 +412,53 @@ public class DbHelper extends SQLiteOpenHelper {
         }
         return video;
     }
+
+    private String saveToInternalStorage(Bitmap bitmapImage, String filename){
+        filename = filename.replaceAll("/","");
+        // path to /data/data/yourapp/app_data/imageDir
+        File directory = context.getDir("imageDir", Context.MODE_PRIVATE);
+        // Create imageDir
+        File mypath=new File(directory, filename);
+
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(mypath);
+            // Use the compress method on the BitMap object to write image to the OutputStream
+            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return directory.getAbsolutePath() + "/" + filename;
+    }
+
+    private String saveVideoToInternalStorage (String key) {
+        File directory = context.getDir("videoDir", Context.MODE_PRIVATE);
+        String filename = key + ".mp4";
+        File file = new File(directory, filename);
+        try {
+            String filePath = "https://www.youtube.com/embed/" + key;
+            java.net.URL url = new URL(filePath);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.connect();
+
+            InputStream input = connection.getInputStream();
+            OutputStream output = new FileOutputStream(file);
+
+            byte data[] = new byte[4096];
+            int count;
+            while ((count = input.read(data)) != -1) {
+                output.write(data, 0, count);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return directory.getAbsolutePath() + "/" + filename;
+    }
 }
+
