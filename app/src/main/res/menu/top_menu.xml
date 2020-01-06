@@ -8,4 +8,10 @@
         android:iconTint="#FFFFFF"
         app:showAsAction="ifRoom"
         app:actionViewClass="android.widget.SearchView" />
+    <item
+        android:id="@+id/close"
+        android:icon="@android:drawable/ic_menu_close_clear_cancel"
+        android:iconTint="#FFFFFF"
+        android:title=""
+        app:showAsAction="ifRoom" />
 </menu>

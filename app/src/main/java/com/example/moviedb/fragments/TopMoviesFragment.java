@@ -29,6 +29,7 @@ import com.example.moviedb.viewmodels.MainViewModelFactory;
 public class TopMoviesFragment extends Fragment {
 
     private Context context;
+    private Menu menu;
     private String search_key = "";
 
     public TopMoviesFragment() {
@@ -59,7 +60,7 @@ public class TopMoviesFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
 
-        final TopMoviesAdapter adapter = new TopMoviesAdapter(context);
+        final TopMoviesAdapter adapter = new TopMoviesAdapter(context, menu);
         recyclerView.setAdapter(adapter);
 
         viewModel.getListLiveData().observe(this, new Observer<PagedList<Result>>() {
@@ -76,16 +77,23 @@ public class TopMoviesFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.search_menu, menu);
+        inflater.inflate(R.menu.top_menu, menu);
         //super.onCreateOptionsMenu(menu, inflater);
-        MenuItem item = menu.findItem(R.id.search);
-        SearchView searchView = (SearchView) item.getActionView();
+        this.menu = menu;
+
+        MenuItem itemSearch = menu.findItem(R.id.search);
+        MenuItem itemClose = menu.findItem(R.id.close);
+        itemSearch.setVisible(true);
+        itemClose.setVisible(false);
+
+        final SearchView searchView = (SearchView) itemSearch.getActionView();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 if(query.isEmpty()){
                     return false;
                 }
+                searchView.onActionViewCollapsed();
                 FragmentTransaction frag_trans = ((MainActivity) context).getSupportFragmentManager().beginTransaction();
                 frag_trans.replace(R.id.fragment_container_with_menu,new TopMoviesFragment(query));
                 frag_trans.commit();

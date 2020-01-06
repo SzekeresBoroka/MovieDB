@@ -64,6 +64,7 @@ public class MovieDetailsFragment extends Fragment {
         title = movie.getTitle() + " (" + movie.getReleaseDate().substring(0,4) + ")";
         ((MainActivity) context).setTitle(title);
         setHasOptionsMenu(true);
+        //((MainActivity) context).invalidateOptionsMenu();
     }
 
     @Override
@@ -130,9 +131,14 @@ public class MovieDetailsFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.movie_details_top_menu, menu);
+        inflater.inflate(R.menu.top_menu, menu);
         //super.onCreateOptionsMenu(menu, inflater);
         ((MainActivity) context).setTitle(title);
+
+        MenuItem itemSearch = menu.findItem(R.id.search);
+        MenuItem itemClose = menu.findItem(R.id.close);
+        itemSearch.setVisible(false);
+        itemClose.setVisible(true);
     }
 
     // handle button activities

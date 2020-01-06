@@ -5,9 +5,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SearchView;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
@@ -35,6 +39,7 @@ public class TopMoviesAdapter extends PagedListAdapter<Result, TopMoviesAdapter.
 
     private Context context;
     private DbHelper db;
+    private Menu menu;
 
     public static DiffUtil.ItemCallback<Result> diffCallback = new DiffUtil.ItemCallback<Result>() {
         @Override
@@ -55,6 +60,13 @@ public class TopMoviesAdapter extends PagedListAdapter<Result, TopMoviesAdapter.
         db = new DbHelper(context);
     }
 
+    public TopMoviesAdapter(Context context, Menu menu) {
+        super(diffCallback);
+        this.context = context;
+        this.menu = menu;
+        db = new DbHelper(context);
+    }
+
     @NonNull
     @Override
     public MViewModel onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -70,6 +82,13 @@ public class TopMoviesAdapter extends PagedListAdapter<Result, TopMoviesAdapter.
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(menu != null) {
+                    MenuItem itemSearch = menu.findItem(R.id.search);
+                    SearchView searchView = (SearchView) itemSearch.getActionView();
+                    searchView.clearFocus();
+                    searchView.onActionViewCollapsed();
+                }
+
                 FragmentTransaction frag_trans = ((MainActivity) context).getSupportFragmentManager().beginTransaction();
                 frag_trans.replace(R.id.fragment_container_without_menu, new MovieDetailsFragment(getItem(position), "Internet"));
                 frag_trans.commit();
@@ -92,6 +111,10 @@ public class TopMoviesAdapter extends PagedListAdapter<Result, TopMoviesAdapter.
                 String title =  nr + ". " + item.getTitle();
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY");
                 try {
+                    if(item.getReleaseDate() == null){
+                        Log.d("HIBA","exception null");
+                        return;
+                    }
                     Date date = simpleDateFormat.parse(item.getReleaseDate());
                     title += " (" + simpleDateFormat.format(date) + ")";
                 } catch (ParseException ignored) {
